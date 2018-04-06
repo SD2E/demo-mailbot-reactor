@@ -1,0 +1,20 @@
+[{
+        "object": {"to": "scotty@enterprise.space", "subject": "Hello, computer.", "body":"A keyboard... how quaint."},
+        "valid": true
+    }, {
+        "object": {"to": "https://beam.up", "subject": "Hello, computer.", "body":"A keyboard... how quaint."},
+        "valid": false
+    }, {
+        "object": {"body":"A keyboard... how quaint."},
+        "valid": false
+    }, {
+        "object": {"body": 1701},
+        "valid": false
+    }, {
+        "object": {"to": "scotty@enterprise.space"},
+        "valid": true
+    }, {
+        "object": {"to": 1966},
+        "valid": false
+    }
+]

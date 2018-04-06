@@ -1,0 +1,7 @@
+---
+api_key: ~
+mailgun_api_url: https://api.mailgun.net/v3/sd2e.org/messages
+sender: reactors-noreply@sd2e.org
+subject: "Automatic notification from Reactors"
+logs:
+  level: "DEBUG"
