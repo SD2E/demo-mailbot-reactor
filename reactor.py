@@ -1,46 +1,7 @@
 import json
 import requests
 from attrdict import AttrDict
-from jsonschema import validate, RefResolver
 from reactors.utils import Reactor, utcnow
-
-
-def validate_json_message(messageJSON='{}',
-                          messageschema='/message.jsonschema',
-                          permissive=True):
-    """
-    Validate JSON string against a JSON schema
-
-    Positional arguments:
-    messageJSON - str - JSON text
-
-    Keyword arguments:
-    schema_file - str - path to the requisite JSON schema file
-    permissive - bool - swallow validation errors [False]
-    """
-    try:
-        with open(messageschema) as schema:
-            schema_json = json.loads(schema.read())
-            schema_abs = 'file://' + messageschema
-    except Exception as e:
-        if permissive is False:
-            raise Exception("schema loading error", e)
-        else:
-            return False
-
-    class fixResolver(RefResolver):
-        def __init__(self):
-            RefResolver.__init__(self, base_uri=schema_abs, referrer=None)
-            self.store[schema_abs] = schema_json
-
-    try:
-        validate(messageJSON, schema_json, resolver=fixResolver())
-        return True
-    except Exception as e:
-        if permissive is False:
-            raise Exception("message validation failed", e)
-        else:
-            return False
 
 
 def main():
@@ -61,8 +22,13 @@ def main():
     r = Reactor()
     m = AttrDict(r.context.message_dict)
 
+    r.logger.info("Message: {}".format(m))
     r.logger.debug("Config: {}".format(r.settings))
-    r.logger.debug("Message: {}".format(m))
+
+    # Use JSONschema-based message validator
+    # - In theory, this obviates some get() boilerplate
+    if not r.validate_message(m):
+        r.on_failure("Invalid message: {}".format(m))
 
     key = r.settings.get('api_key', None)
     if key is None:
@@ -89,19 +55,27 @@ def main():
     except Exception as e:
         r.on_failure("Error setting up message: {}".format(e))
 
-    try:
-        request = requests.post(
-            mailgun_api_url,
-            auth=('api', key),
-            data={'from': sender,
-                  'to': recipient,
-                  'subject': subject,
-                  'text': body})
-    except Exception as e:
-        r.on_failure("Error posting message: {}".format(e))
+    mailgunmessage = {'from': sender,
+                      'to': recipient,
+                      'subject': subject,
+                      'text': body}
 
-    r.on_success("Status: {} | Message: {}".format(
-        request.status_code, request.text))
+    if r.local is False:
+        try:
+            request = requests.post(
+                mailgun_api_url,
+                auth=('api', key),
+                data=mailgunmessage)
+        except Exception as e:
+            r.on_failure("Error posting message: {}".format(e))
+
+        r.on_success("Status: {} | Message: {}".format(
+            request.status_code, request.text))
+    else:
+        r.logger.info("Skipped Mailgun API call since this is a test.")
+        r.on_success("Status: {} | Message: {}".format(None, None))
+
+
 
 
 if __name__ == '__main__':

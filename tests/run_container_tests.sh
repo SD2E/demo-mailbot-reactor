@@ -10,17 +10,16 @@
 #   REACTOR_RUN_OPTS
 #   REACTOR_USE_TMP
 #   REACTOR_CLEANUP_TMP
-#   REACTOR_LOCAL
+#   REACTOR_OVERRIDE_LOCAL
 #   CONTAINER_REPO
 #   CONTAINER_TAG
 #   AGAVE_CACHE_DIR
 #   REACTOR_JOB_DIR
 #
-# Required input
+# Required inputs
 #   MESSAGE - File containing JSON message body
-# Optional
 #   CONFIG - Reactor config file (reactor.rc)
-#
+
 
 COMMANDS="$@"
 
@@ -47,12 +46,12 @@ if [ -z "${CONTAINER_IMAGE}" ]; then
 fi
 
 # Api integration
-AGAVE_CRED="${AGAVE_CACHE_DIR}"
-if [ ! -d "${AGAVE_CRED}" ]; then
-    AGAVE_CRED="${HOME}/.agave"
+AGAVE_CREDS="${AGAVE_CACHE_DIR}"
+if [ ! -d "${AGAVE_CREDS}" ]; then
+    AGAVE_CREDS="${HOME}/.agave"
 fi
-if [ ! -f "${AGAVE_CRED}/current" ]; then
-    die "No API credentials found in ${AGAVE_CRED}"
+if [ ! -f "${AGAVE_CREDS}/current" ]; then
+    die "No API credentials found in ${AGAVE_CREDS}"
 fi
 
 # Emphemeral directory
@@ -74,12 +73,12 @@ log "Working directory: ${WD}"
 
 # Volume mounts
 MOUNTS="-v ${WD}:/mnt/ephemeral-01"
-if [ -d "${AGAVE_CACHE_DIR}" ]; then
-    MOUNTS="$MOUNTS -v ${AGAVE_CACHE_DIR}:/root/.agave:rw"
+if [ -d "${AGAVE_CREDS}" ]; then
+    MOUNTS="$MOUNTS -v ${AGAVE_CREDS}:/root/.agave:rw"
 fi
 
 envopts=""
-if ((REACTOR_LOCAL)); then
+if ((! REACTOR_OVERRIDE_LOCAL )); then
     envopts="${envopts} -e LOCALONLY=1"
 fi
 

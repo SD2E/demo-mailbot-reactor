@@ -4,4 +4,3 @@ FROM sd2e/reactors:python2-edge
 # Reactor messages
 
 ADD message.jsonschema /message.jsonschema
-ADD tests /

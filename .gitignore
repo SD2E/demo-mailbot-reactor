@@ -1,8 +1,11 @@
 # Abaco and Reactors-specific
 .agave
 .agpy
-secrets.json
 .ACTOR_ID*
+config.yml
+secrets.json
+tests/data/executions.json
+tests/data/tests-deployed-message.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
