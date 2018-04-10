@@ -68,9 +68,10 @@ support scripts to set up the test environments.
 
 ```
 make container       # Uses abaco-deploy -R to test building the container
-make tests-local     # Exercise the Reactor without necessarily running it
-make tests-reactor   # Simulate the Reactor running in the TACC.cloud
-make tests-deployed  # Deploy this Reactor and send it a test message
+make container-py3   # Uses Dockerfile.py3 to build the container
+make tests-local     # Exercise the Reactor image necessarily running it
+make tests-reactor   # Simulate running the Reactor image on the TACC.cloud
+make tests-deployed  # Deploy the Reactor and send it a test message
 make clean           # Remove cache residue from testing
 ```
 
